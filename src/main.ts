@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import * as morgan from 'morgan';
 import { AppModule } from './app/app.module';
+import { middleware } from './middlewares/app.middleware';
 
 async function bootstrap() {
   const app: INestApplication = await NestFactory.create<INestApplication>(AppModule);
@@ -12,6 +13,8 @@ async function bootstrap() {
   app.use(morgan('dev'));
 
   app.setGlobalPrefix('api/v1')
+
+  middleware(app)
   await app.listen(PORT);
 
   if (isNaN(parseInt(process.env.PORT))) {
