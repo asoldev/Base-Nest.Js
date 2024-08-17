@@ -10,9 +10,7 @@ RUN yarn
 
 COPY . .
 
-FROM node:20.16.0-alpine  As production
-
-WORKDIR /usr/src/app
+RUN yarn build
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}

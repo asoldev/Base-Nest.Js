@@ -9,4 +9,7 @@ export const environment = () => ({
     host: process.env.HOST_REDIS,
     port: Number(process.env.PORT_REDIS),
   },
+  mongodb: {
+    url: process.env.MONGODB_URL,
+  },
 });

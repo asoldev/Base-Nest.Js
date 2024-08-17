@@ -10,7 +10,20 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     ports:
-      - ${PORT}:${PORT}
+      - '${PORT}:${PORT}'
     env_file:
       - .env
-    command: yarn run start:dev
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: always
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

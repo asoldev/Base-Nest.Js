@@ -12,7 +12,7 @@ import { ApiModule } from '../apis/api.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [environment] }),
-    MongooseModule.forRoot('mongodb://localhost:27017/test'),
+    MongooseModule.forRoot(environment().mongodb.url),
     CacheManagerModule,
     AuthenticationModule,
     ApiModule,
