@@ -6,7 +6,7 @@ import { UsersModule } from '../apis/user/users.module';
 import {
   Permissions,
   PermissionsSchema,
-} from '../cores/__schema__/rbac.schema';
+} from '../cores/__schema__/permission.schema';
 import { AuthenticationController } from './authentication.controller';
 import { AuthenticationService } from './services/authentication.service';
 import { RbacService } from './services/rbac.service';

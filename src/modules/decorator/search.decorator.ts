@@ -22,7 +22,7 @@ export interface ParsedQueryParams {
  * @param ctx - The execution context for the current request.
  * @returns An object containing parsed query parameters.
  */
-export const QueryParams = createParamDecorator(
+export const SearchParams = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): ParsedQueryParams => {
     const request = ctx.switchToHttp().getRequest();
     const queryParams = new URLSearchParams(request.query);

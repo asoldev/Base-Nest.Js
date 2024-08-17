@@ -1,6 +1,7 @@
 import { DeleteResult } from 'mongodb';
 import {
   FilterQuery,
+  InsertManyOptions,
   Model,
   ProjectionType,
   QueryOptions,
@@ -8,12 +9,14 @@ import {
   UpdateWithAggregationPipeline,
   UpdateWriteOpResult,
 } from 'mongoose';
-import { ParsedQueryParams } from '../../modules/decorator/query.decorator';
+import { ParsedQueryParams } from '../../modules/decorator/search.decorator';
 import {
   FindAllResponse,
   IRepositoryService,
 } from '../interfaces/repository.interface';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class RepositoryService<T> implements IRepositoryService<T> {
   constructor(private readonly model: Model<T>) {
     this.model = model;
@@ -57,6 +60,18 @@ export class RepositoryService<T> implements IRepositoryService<T> {
     options?: QueryOptions,
   ): Promise<T | null> {
     return this.model.findOne(filter, projection, options).exec();
+  }
+
+  public async insertOne(item: T, options?: QueryOptions) {
+    const document: T = new this.model(item);
+    return this.model.create(document, options);
+  }
+
+  protected async insertMany(
+    items: T[],
+    options?: InsertManyOptions & { lean: true },
+  ) {
+    return this.model.insertMany(items, options);
   }
 
   public async updateOne(

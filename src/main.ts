@@ -3,6 +3,8 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import * as morgan from 'morgan';
 import { AppModule } from './app/app.module';
 import { middleware } from './middlewares/app.middleware';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { configSwagger } from './config/swagger.config';
 
 async function bootstrap() {
   const app: INestApplication =
@@ -16,6 +18,14 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
 
   middleware(app);
+
+  SwaggerModule.setup('api-docs', app, configSwagger(app), {
+    swaggerOptions: {
+      persistAuthorization: true,
+      defaultModelsExpandDepth: -1,
+    },
+  });
+
   await app.listen(PORT);
 
   if (isNaN(parseInt(process.env.PORT))) {

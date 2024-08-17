@@ -8,12 +8,14 @@ import { RBAcGuard } from '../authentication/guards/RBAc.guard';
 import { CacheManagerModule } from '../cache-manager/cache-manager.module';
 import { environment } from '../config/environment/environment';
 import { AppController } from './app.controller';
+import { ApiModule } from '../apis/api.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [environment] }),
     MongooseModule.forRoot('mongodb://localhost:27017/test'),
     CacheManagerModule,
     AuthenticationModule,
+    ApiModule,
   ],
   controllers: [AppController],
   providers: [
