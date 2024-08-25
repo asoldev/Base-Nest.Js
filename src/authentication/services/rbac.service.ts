@@ -1,30 +1,58 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { RBAC } from '../../app/config';
-import { RoleRbac } from '../roles/role.rbac';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
+import { COLLECTION_NAME } from 'src/cores/__schema__/config/enum';
+import { Role } from 'src/cores/__schema__/role.schema';
+import { User } from 'src/cores/__schema__/user.schema';
+import { RepositoryService } from 'src/cores/services/repository.service';
+import { CacheManagerService } from './../../cache-manager/cache-manager.service';
+import { PERMISSION_ACTIONS } from 'src/cores/__schema__/permission.schema';
 
 @Injectable()
-export class RbacService {
-  constructor() {}
-
-  async getRole(role: string) {
-    const permission = RBAC;
-
-    if (!permission.roles.includes(role)) {
-      throw new ForbiddenException(`Role ${role} is not defined`);
+export class RbacService extends RepositoryService<Role> {
+    constructor(
+        private cacheManagerService: CacheManagerService,
+        @InjectModel(COLLECTION_NAME.ROLE) roleModel: Model<Role>,
+    ) {
+        super(roleModel);
     }
 
-    if (!permission.permissions) {
-      throw new ForbiddenException('Permission list is not defined');
-    }
+    async checkUserPermissions(
+        user: User,
+        entityType: string,
+        permission: PERMISSION_ACTIONS,
+    ): Promise<boolean> {
+        const cacheKey = `role-${user._id.toString()}`;
 
-    if (!permission.grants) {
-      throw new ForbiddenException('Grant list is not defined');
-    }
+        const cachedRole = await this.cacheManagerService.get(cacheKey);
 
-    if (!permission.grants[role]) {
-      throw new ForbiddenException(`Role ${role} does assign to permission`);
-    }
+        if (cachedRole) {
+            const hasPermission = cachedRole.permissions.some(
+                (p: { key: string; value: string | PERMISSION_ACTIONS[] }) =>
+                    p.key === entityType && p.value.includes(permission),
+            );
+            if (hasPermission) {
+                return true;
+            }
+        }
 
-    return new RoleRbac(permission.grants[role]);
-  }
+        const filter = {
+            user: new Types.ObjectId(user._id),
+            permissions: {
+                $elemMatch: {
+                    key: entityType,
+                    value: { $in: [permission, PERMISSION_ACTIONS.FULL] },
+                },
+            },
+            is_active: true,
+        };
+        const role = await this.findOneByFilter(filter);
+
+        if (role) {
+            await this.cacheManagerService.set(cacheKey, role);
+            return true;
+        }
+
+        return false;
+    }
 }

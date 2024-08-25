@@ -1,53 +1,60 @@
 import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
+    CanActivate,
+    ExecutionContext,
+    Injectable,
+    UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { IS_PUBLIC_KEY } from '../../modules/decorator/public.decorator';
+import { IsPublic } from '../../modules/decorator/public.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(
-    private jwtService: JwtService,
-    private configService: ConfigService,
-    private reflector: Reflector,
-  ) {}
+    protected jwtService: JwtService;
+    protected configService: ConfigService;
+    protected reflector: Reflector;
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-    if (isPublic) {
-      return true;
+    constructor(
+        jwtService: JwtService,
+        configService: ConfigService,
+        reflector: Reflector,
+    ) {
+        this.jwtService = jwtService;
+        this.configService = configService;
+        this.reflector = reflector;
     }
 
-    const request = context.switchToHttp().getRequest();
+    async canActivate(context: ExecutionContext): Promise<boolean> {
+        if (this.getReflectorPublic(context)) return true;
 
-    const token = this.extractTokenFromHeader(request);
+        const request = context.switchToHttp().getRequest();
+        const token = this.extractTokenFromHeader(request);
+        if (!token) {
+            throw new UnauthorizedException('Invalid request token');
+        }
+        try {
+            const payload = await this.jwtService.verifyAsync(token, {
+                secret: this.configService.get<string>('jwt.secret'),
+            });
 
-    if (!token) {
-      throw new UnauthorizedException('Invalid request token');
+            request['user'] = payload;
+        } catch {
+            throw new UnauthorizedException('Could not authorize request');
+        }
+        return true;
     }
-    try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get<string>('jwt.secret'),
-      });
 
-      request['user'] = payload;
-    } catch {
-      throw new UnauthorizedException('Could not authorize request');
+    private extractTokenFromHeader(request: Request): string | undefined {
+        const [type, token] = request.headers.authorization?.split(' ') ?? [];
+        return type === 'Bearer' ? token : undefined;
     }
-    return true;
-  }
 
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
-  }
+    protected getReflectorPublic(context: ExecutionContext) {
+        return this.reflector.getAllAndOverride<boolean>(IsPublic.name, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+    }
 }

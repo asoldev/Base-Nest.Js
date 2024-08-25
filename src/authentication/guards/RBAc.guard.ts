@@ -1,98 +1,75 @@
 import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
+    CanActivate,
+    ExecutionContext,
+    ForbiddenException,
+    Injectable,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { IS_PUBLIC_KEY } from '../../modules/decorator/public.decorator';
-import {
-  RBAcAnyPermissions,
-  RBAcPermissions,
-} from '../../modules/decorator/rbac.permissions.decorator';
+import { JwtService } from '@nestjs/jwt';
+import { MESSAGES } from 'src/common/response.message';
+import { RBAcPermissions } from '../../modules/decorator/rbac.permissions.decorator';
 import { RbacService } from '../services/rbac.service';
+import { AuthGuard } from './auth.guard';
+import { PERMISSION_ACTIONS } from 'src/cores/__schema__/permission.schema';
 
 @Injectable()
-export class RBAcGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-    private readonly rbacService: RbacService,
-  ) {}
-
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-
-    if (isPublic) {
-      return true;
+export class RBAcGuard extends AuthGuard implements CanActivate {
+    constructor(
+        protected jwtService: JwtService,
+        protected configService: ConfigService,
+        protected reflector: Reflector,
+        private readonly rbacService: RbacService,
+    ) {
+        super(jwtService, configService, reflector);
     }
 
-    const user = request.user;
+    async canActivate(context: ExecutionContext): Promise<boolean> {
+        if (this.getReflectorPublic(context)) return true;
+        const request = context.switchToHttp().getRequest();
+        const permission = this.getReflectorPermission(context);
+        const entitiesType = request.headers['entities_type'];
+        const user = request.user;
 
-    if (!user?.role) {
-      throw new ForbiddenException('Getting user was failed.');
+        if (!user?.role) {
+            throw new ForbiddenException(MESSAGES.RBAC.GET_INFO_ERROR);
+        }
+
+        if (!entitiesType) {
+            throw new ForbiddenException('Missing field entities type.');
+        }
+
+        if (!permission) {
+            return true;
+        }
+
+        const hasRequiredPermissions =
+            await this.rbacService.checkUserPermissions(
+                user,
+                entitiesType,
+                permission,
+            );
+
+        if (!hasRequiredPermissions) {
+            throw new ForbiddenException(MESSAGES.RBAC.INSUFFICIENT);
+        }
+
+        return hasRequiredPermissions;
     }
 
-    const role = await this.rbacService.getRole(user.role);
+    private getReflectorPermission(
+        context: ExecutionContext,
+    ): PERMISSION_ACTIONS {
+        const permission =
+            this.reflector.get<PERMISSION_ACTIONS>(
+                RBAcPermissions.name,
+                context.getHandler(),
+            ) ||
+            this.reflector.get<PERMISSION_ACTIONS>(
+                RBAcPermissions.name,
+                context.getClass(),
+            );
 
-    if (!this.hasRequiredPermissions(role, context)) {
-      throw new ForbiddenException('Insufficient permissions.');
+        return permission;
     }
-
-    return true;
-  }
-
-  private hasRequiredPermissions(
-    role: any,
-    context: ExecutionContext,
-  ): boolean {
-    const perm = this.rbac(context);
-    const permAny = this.rbacAny(context);
-
-    if (perm.length > 0 && !role.can(...perm)) {
-      return false;
-    }
-
-    if (permAny.length > 0 && !role.any(...permAny)) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private rbac(context: ExecutionContext): string[] {
-    const permissions =
-      this.reflector.get<string[]>(
-        RBAcPermissions.name,
-        context.getHandler(),
-      ) ||
-      this.reflector.get<string[]>(RBAcPermissions.name, context.getClass());
-
-    if (permissions !== undefined) {
-      return permissions;
-    }
-
-    return [];
-  }
-
-  private rbacAny(context: ExecutionContext): string[][] {
-    const permissions =
-      this.reflector.get<string[][]>(
-        RBAcAnyPermissions.name,
-        context.getHandler(),
-      ) ||
-      this.reflector.get<string[][]>(
-        RBAcAnyPermissions.name,
-        context.getClass(),
-      );
-
-    if (permissions !== undefined) {
-      return permissions;
-    }
-
-    return [];
-  }
 }

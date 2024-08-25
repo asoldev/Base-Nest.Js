@@ -1,32 +1,13 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
-@Schema({
-  timestamps: {
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-  },
-})
-export class User extends Document {
-  @Prop({ type: String })
-  id: string;
+export abstract class Base extends Document {
+    @Prop({ type: Boolean, default: true })
+    is_active: boolean;
 
-  @Prop({ type: String, required: true })
-  first_name: string;
+    @Prop({ type: Date, default: Date.now })
+    created_at?: Date;
 
-  @Prop({ type: String, required: true })
-  last_name: string;
-
-  @Prop({ type: String, required: true, unique: true })
-  email: string;
-
-  @Prop({ type: String })
-  phone: string;
-
-  @Prop({ type: [String] })
-  roles: string[];
-
-  @Prop({ type: String })
-  refresh_token: string;
+    @Prop({ type: Date, default: Date.now })
+    updated_at?: Date;
 }
-
-export const UserSchema = SchemaFactory.createForClass(User);
