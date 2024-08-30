@@ -1,22 +1,14 @@
-import { RBAcPermissions } from './../modules/decorator/rbac.permissions.decorator';
-import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
-
-import { MESSAGES } from 'src/common/response.message';
-import { PERMISSION_ACTIONS } from 'src/cores/__schema__/permission.schema';
+import { Controller, Get, HttpCode, HttpStatus } from "@nestjs/common";
+import { IsPublic } from "src/shared/decorator/public.decorator";
 
 @Controller()
 export class AppController {
     constructor() {}
 
     @HttpCode(HttpStatus.OK)
-    @RBAcPermissions(PERMISSION_ACTIONS.GET)
+    @IsPublic()
     @Get()
     getHello() {
-        return {
-            data: 'Heath check',
-            message: MESSAGES.GET_SUCCESSFUL,
-            error: false,
-            code: HttpStatus.OK,
-        };
+        return "Heath check";
     }
 }
