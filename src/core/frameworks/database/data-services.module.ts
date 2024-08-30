@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common";
-import { MongoDataServicesModule } from "../mongo/mongo.module";
+import { MongoModule } from "./mongo/mongo.module";
 
 @Module({
-    imports: [MongoDataServicesModule],
-    exports: [MongoDataServicesModule],
+    imports: [MongoModule],
+    exports: [MongoModule],
 })
 export class DataServicesModule {}

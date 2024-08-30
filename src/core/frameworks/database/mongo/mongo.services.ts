@@ -8,7 +8,7 @@ import { User } from "src/core/entities/user.schema";
 import { AbstractDataServices } from "src/modules/abstracts/data-services.abstract";
 
 @Injectable()
-export class MongoDataServices
+export class MongoServices
     implements AbstractDataServices, OnApplicationBootstrap
 {
     users: MongoRepository<User>;

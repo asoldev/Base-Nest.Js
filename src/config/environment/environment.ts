@@ -8,6 +8,13 @@ export const environment = () => ({
     REDIS: {
         URL: process.env.REDIS_URL,
     },
+    MINIO: {
+        ENDPOINT: process.env.MINIO_ENDPOINT,
+        PORT: parseInt(process.env.MINIO_PORT),
+        USE_SSL: process.env.MINIO_USE_SSL === "true",
+        ACCESS_KEY: process.env.MINIO_ACCESSKEY,
+        SECRET_KEY: process.env.MINIO_SECRETKEY,
+    },
     mongodb: {
         url: process.env.MONGODB_URL,
     },

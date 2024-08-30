@@ -8,11 +8,13 @@ import { CacheManagerModule } from "src/core/frameworks/cache-manager/cache-mana
 import { TimeoutInterceptor } from "src/shared/interceptors/timeout.interceptor";
 import { TransformInterceptor } from "src/shared/interceptors/transform.interceptor";
 import { AppController } from "./app.controller";
+import { V1Module } from "src/modules/v1.module";
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true, load: [environment] }),
         MongooseModule.forRootAsync(mongoConfig),
         CacheManagerModule,
+        V1Module,
     ],
     controllers: [AppController],
     providers: [

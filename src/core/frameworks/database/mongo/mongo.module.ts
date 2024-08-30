@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { MongoDataServices } from "./mongo.services";
 import { COLLECTION_NAME } from "src/core/entities/enum/collection-name.enum";
 import { RoleSchema } from "src/core/entities/role.schema";
 import { UserSchema } from "src/core/entities/user.schema";
 import { AbstractDataServices } from "src/modules/abstracts/data-services.abstract";
+import { MongoServices } from "./mongo.services";
 
 @Module({
     imports: [
@@ -16,9 +16,9 @@ import { AbstractDataServices } from "src/modules/abstracts/data-services.abstra
     providers: [
         {
             provide: AbstractDataServices,
-            useClass: MongoDataServices,
+            useClass: MongoServices,
         },
     ],
     exports: [AbstractDataServices],
 })
-export class MongoDataServicesModule {}
+export class MongoModule {}
