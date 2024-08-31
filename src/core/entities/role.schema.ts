@@ -6,7 +6,7 @@ import { Types } from "mongoose";
 import { COLLECTION_NAME } from "./enum/collection-name.enum";
 import { User } from "./user.schema";
 import { BaseEntity } from "./base.schema";
-import { PERMISSION_ACTIONS } from "./permission.schema";
+import { Permissions, PERMISSION_ACTIONS } from "./permission.schema";
 
 @Schema({ collection: COLLECTION_NAME.ROLE })
 export class Role extends BaseEntity {

@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
-import { Expose, plainToClass } from "class-transformer";
+import { Exclude, Expose } from "class-transformer";
 import { IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { COLLECTION_NAME } from "./enum/collection-name.enum";
 import { BaseEntity } from "./base.schema";
+import { COLLECTION_NAME } from "./enum/collection-name.enum";
 
 @Schema({ collection: COLLECTION_NAME.USER })
 export class User extends BaseEntity {
@@ -32,6 +32,7 @@ export class User extends BaseEntity {
     @IsString()
     @IsNotEmpty()
     @Prop({ type: String, required: true })
+    @Exclude()
     password: string;
 
     @ApiProperty()
@@ -49,7 +50,3 @@ export class User extends BaseEntity {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-UserSchema.methods.toJSON = function () {
-    const user = this.toObject();
-    return plainToClass(User, user, { excludeExtraneousValues: true });
-};

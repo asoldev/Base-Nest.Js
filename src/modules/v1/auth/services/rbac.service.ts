@@ -1,6 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { Types } from "mongoose";
-import { PERMISSION_ACTIONS } from "src/core/entities/permission.schema";
+import { FilterQuery, Types } from "mongoose";
+import { COLLECTION_NAME } from "src/core/entities/enum/collection-name.enum";
+import { PERMISSION_ACTIONS, Permissions } from "src/core/entities/permission.schema";
+import { Role } from "src/core/entities/role.schema";
 import { User } from "src/core/entities/user.schema";
 import { CacheManagerService } from "src/core/frameworks/cache-manager/cache-manager.service";
 import { AbstractDataServices } from "src/modules/abstracts/data-services.abstract";
@@ -12,26 +14,21 @@ export class RbacService {
         private dataService: AbstractDataServices
     ) {}
 
-    async checkUserPermissions(
-        user: User,
-        entityType: string,
-        permission: PERMISSION_ACTIONS
-    ): Promise<boolean> {
-        const cacheKey = `role-${user._id.toString()}`;
+    async checkUserPermissions(user: User, entityType: string, permission: PERMISSION_ACTIONS): Promise<boolean> {
+        const cacheKey: string = this.cacheManagerService.generateKey(COLLECTION_NAME.ROLE, user._id.toString());
 
-        const cachedRole = await this.cacheManagerService.get(cacheKey);
+        const cachedRole: Role | null = await this.cacheManagerService.get(cacheKey);
 
         if (cachedRole) {
             const hasPermission = cachedRole.permissions.some(
-                (p: { key: string; value: string | PERMISSION_ACTIONS[] }) =>
-                    p.key === entityType && p.value.includes(permission)
+                (p: Permissions) => p.key === entityType && p.value.includes(permission)
             );
             if (hasPermission) {
                 return true;
             }
         }
 
-        const filter = {
+        const filter: FilterQuery<Role> = {
             user: new Types.ObjectId(user._id),
             permissions: {
                 $elemMatch: {
@@ -41,7 +38,7 @@ export class RbacService {
             },
             is_active: true,
         };
-        const role = await this.dataService.roles.findOne(filter);
+        const role: Role = await this.dataService.roles.findOne(filter);
 
         if (role) {
             await this.cacheManagerService.set(cacheKey, role);

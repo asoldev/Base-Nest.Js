@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class TokenService {
@@ -17,7 +17,7 @@ export class TokenService {
     }
 
     public generateAccessToken(payload): Promise<string> {
-        const expiresInOneYear = 30 * 24 * 60 * 60;
+        const expiresInOneYear: number = 30 * 24 * 60 * 60;
 
         return this.jwtService.signAsync(payload, {
             expiresIn: expiresInOneYear,
@@ -25,7 +25,7 @@ export class TokenService {
     }
 
     public generateRefreshToken(payload): Promise<string> {
-        const expiresInOneYear = 365 * 24 * 60 * 60;
+        const expiresInOneYear: number = 365 * 24 * 60 * 60;
 
         return this.jwtService.signAsync(payload, {
             expiresIn: expiresInOneYear,

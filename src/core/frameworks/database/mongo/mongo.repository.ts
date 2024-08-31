@@ -1,3 +1,4 @@
+import { AqpQuery } from "api-query-params";
 import { DeleteResult, MongoError } from "mongodb";
 import {
     FilterQuery,
@@ -11,11 +12,7 @@ import {
     UpdateWithAggregationPipeline,
     UpdateWriteOpResult,
 } from "mongoose";
-import {
-    AbstractRepository,
-    PaginationDto,
-} from "src/modules/abstracts/repository.abstract";
-import { ParsedQueryParams } from "src/shared/decorator/search.decorator";
+import { AbstractRepository, PaginationDto } from "src/modules/abstracts/repository.abstract";
 
 export class MongoRepository<T> implements AbstractRepository<T> {
     private _repository: Model<T>;
@@ -27,11 +24,8 @@ export class MongoRepository<T> implements AbstractRepository<T> {
         return this._repository.countDocuments(filter).exec();
     }
 
-    public async findAll(
-        params: ParsedQueryParams,
-        options?: QueryOptions
-    ): Promise<PaginationDto<T>> {
-        const { filter, limit, populate, projection, skip, sort } = params;
+    public async findAll(params: AqpQuery, options?: QueryOptions): Promise<PaginationDto<T>> {
+        const { filter, limit, population, projection, skip, sort } = params;
 
         try {
             const [documents, count] = await Promise.all([
@@ -39,8 +33,8 @@ export class MongoRepository<T> implements AbstractRepository<T> {
                     .find(filter, projection, options)
                     .skip(skip)
                     .limit(limit)
-                    .sort(sort)
-                    .populate(populate)
+                    .sort(sort as any)
+                    .populate(population)
                     .exec(),
                 this.getCount(filter),
             ]);
@@ -85,10 +79,7 @@ export class MongoRepository<T> implements AbstractRepository<T> {
         }
     }
 
-    public async insertMany(
-        items: T[],
-        options?: InsertManyOptions & { lean: true }
-    ) {
+    public async insertMany(items: T[], options?: InsertManyOptions & { lean: true }) {
         try {
             return this._repository.insertMany(items, options);
         } catch (error) {
@@ -102,9 +93,7 @@ export class MongoRepository<T> implements AbstractRepository<T> {
         options?: QueryOptions
     ): Promise<T | null> {
         try {
-            return this._repository
-                .findByIdAndUpdate(id, update, { new: true, ...options })
-                .exec();
+            return this._repository.findByIdAndUpdate(id, update, { new: true, ...options }).exec();
         } catch (error) {
             throw new MongoError(error);
         }
@@ -121,17 +110,12 @@ export class MongoRepository<T> implements AbstractRepository<T> {
         }
     }
 
-    public async deleteOne(
-        id: Types.ObjectId,
-        hard: boolean = false
-    ): Promise<T | null> {
+    public async deleteOne(id: Types.ObjectId, hard: boolean = false): Promise<T | null> {
         try {
             if (hard) {
                 return this._repository.findByIdAndDelete(id).exec();
             } else {
-                return this._repository
-                    .findByIdAndUpdate(id, { is_active: false }, { new: true })
-                    .exec();
+                return this._repository.findByIdAndUpdate(id, { is_active: false }, { new: true }).exec();
             }
         } catch (error) {
             throw new MongoError(error);
@@ -146,9 +130,7 @@ export class MongoRepository<T> implements AbstractRepository<T> {
             if (hard) {
                 return this._repository.deleteMany(filter).exec();
             } else {
-                return this._repository
-                    .updateMany(filter, { is_active: false })
-                    .exec();
+                return this._repository.updateMany(filter, { is_active: false }).exec();
             }
         } catch (error) {
             throw new MongoError(error);
@@ -157,21 +139,15 @@ export class MongoRepository<T> implements AbstractRepository<T> {
 
     public async restoreOne(id: ObjectId): Promise<T | null> {
         try {
-            return this._repository
-                .findByIdAndUpdate(id, { is_active: true }, { new: true })
-                .exec();
+            return this._repository.findByIdAndUpdate(id, { is_active: true }, { new: true }).exec();
         } catch (error) {
             throw new MongoError(error);
         }
     }
 
-    public async restoreMany(
-        filter: FilterQuery<T>
-    ): Promise<UpdateWriteOpResult> {
+    public async restoreMany(filter: FilterQuery<T>): Promise<UpdateWriteOpResult> {
         try {
-            return this._repository
-                .updateMany(filter, { is_active: true })
-                .exec();
+            return this._repository.updateMany(filter, { is_active: true }).exec();
         } catch (error) {
             throw new MongoError(error);
         }

@@ -9,8 +9,7 @@ import { HttpErrorExceptionFilter } from "src/shared/exception-filters/http-exce
 import { MongoErrorExceptionFilter } from "src/shared/exception-filters/mongodb-exception.filter";
 
 async function bootstrap() {
-    const app: INestApplication =
-        await NestFactory.create<INestApplication>(AppModule);
+    const app: INestApplication = await NestFactory.create<INestApplication>(AppModule);
     app.enableCors();
 
     const isProduction = process.env.NODE_ENV === "production" ? true : false;
@@ -20,10 +19,7 @@ async function bootstrap() {
 
     app.setGlobalPrefix("api/v1");
 
-    app.useGlobalFilters(
-        new MongoErrorExceptionFilter(),
-        new HttpErrorExceptionFilter()
-    );
+    app.useGlobalFilters(new MongoErrorExceptionFilter(), new HttpErrorExceptionFilter());
 
     app.use(
         helmet({

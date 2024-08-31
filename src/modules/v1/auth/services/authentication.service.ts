@@ -1,40 +1,29 @@
-// import { HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-// import { UsersService } from '../../apis/user/services/users.service';
-// import { TokenService } from './token.service';
+import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { User } from "src/core/entities/user.schema";
+import { BaseDto } from "src/core/utils/base-dto.helper";
+import { AbstractDataServices } from "src/modules/abstracts/data-services.abstract";
+import { TokenService } from "./token.service";
 
-// @Injectable()
-// export class AuthenticationService {
-//           constructor(
-//                     private usersService: UsersService,
-//                     private tokenService: TokenService,
-//           ) {}
+@Injectable()
+export class AuthenticationService {
+    constructor(
+        private dataService: AbstractDataServices,
+        private tokenService: TokenService
+    ) {}
 
-//           // public async signIn(username: string, pass: string): Promise<any> {
-//           //     const user = await this.usersService.findOne(username);
-//           //     if (!user) {
-//           //         throw new NotFoundException({
-//           //             data: null,
-//           //             error: true,
-//           //             message: MESSAGES.USER_NOT_FOUND,
-//           //         });
-//           //     }
-//           //     if (user?.password !== pass) {
-//           //         throw new UnauthorizedException({
-//           //             data: null,
-//           //             error: true,
-//           //             message: MESSAGES.PASSWORD_NOT_MATCH,
-//           //         });
-//           //     }
-//           //     const { password, ...result } = user;
-//           //     const { accessToken, refreshToken } = await this.tokenService.generateTokens(result);
-//           //     return {
-//           //         data: {
-//           //             user: result,
-//           //             accessToken, refreshToken
-//           //         },
-//           //         error: false,
-//           //         message: MESSAGES.GET_SUCCESSFUL,
-//           //         code: HttpStatus.OK
-//           //     }
-//           // }
-// }
+    public async signIn(username: string, pass: string): Promise<any> {
+        const user = BaseDto.plainToClass(User, await this.dataService.users.findOne({ username }));
+        if (!user) {
+            throw new NotFoundException("User not found");
+        }
+        if (user?.password !== pass) {
+            throw new UnauthorizedException("Password not match.");
+        }
+        const { accessToken, refreshToken } = await this.tokenService.generateTokens(user);
+        return {
+            user,
+            accessToken,
+            refreshToken,
+        };
+    }
+}

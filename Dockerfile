@@ -12,9 +12,6 @@ COPY . .
 
 RUN yarn build
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
-
 EXPOSE 5555
 
 CMD ["yarn", "run", "start:prod"]

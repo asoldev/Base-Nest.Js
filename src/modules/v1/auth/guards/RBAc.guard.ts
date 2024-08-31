@@ -1,17 +1,11 @@
-import {
-    CanActivate,
-    ExecutionContext,
-    ForbiddenException,
-    Injectable,
-} from "@nestjs/common";
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
-import { RbacService } from "../services/rbac.service";
-import { AuthGuard } from "./auth.guard";
-import { MESSAGES } from "@nestjs/core/constants";
 import { PERMISSION_ACTIONS } from "src/core/entities/permission.schema";
 import { RBAcPermissions } from "src/shared/decorator/rbac.permissions.decorator";
+import { RbacService } from "../services/rbac.service";
+import { AuthGuard } from "./auth.guard";
 
 @Injectable()
 export class RBAcGuard extends AuthGuard implements CanActivate {
@@ -26,13 +20,14 @@ export class RBAcGuard extends AuthGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         if (this.getReflectorPublic(context)) return true;
+
         const request = context.switchToHttp().getRequest();
         const permission = this.getReflectorPermission(context);
         const entitiesType = request.headers["entities_type"];
         const user = request.user;
 
         if (!user?.role) {
-            throw new ForbiddenException(MESSAGES.APPLICATION_READY);
+            throw new ForbiddenException("User role is not defined. Access denied.");
         }
 
         if (!entitiesType) {
@@ -43,32 +38,19 @@ export class RBAcGuard extends AuthGuard implements CanActivate {
             return true;
         }
 
-        const hasRequiredPermissions =
-            await this.rbacService.checkUserPermissions(
-                user,
-                entitiesType,
-                permission
-            );
+        const hasRequiredPermissions = await this.rbacService.checkUserPermissions(user, entitiesType, permission);
 
         if (!hasRequiredPermissions) {
-            throw new ForbiddenException(MESSAGES.APPLICATION_READY);
+            throw new ForbiddenException("Insufficient permissions. Access denied.");
         }
 
         return hasRequiredPermissions;
     }
 
-    private getReflectorPermission(
-        context: ExecutionContext
-    ): PERMISSION_ACTIONS {
+    private getReflectorPermission(context: ExecutionContext): PERMISSION_ACTIONS {
         const permission =
-            this.reflector.get<PERMISSION_ACTIONS>(
-                RBAcPermissions.name,
-                context.getHandler()
-            ) ||
-            this.reflector.get<PERMISSION_ACTIONS>(
-                RBAcPermissions.name,
-                context.getClass()
-            );
+            this.reflector.get<PERMISSION_ACTIONS>(RBAcPermissions.name, context.getHandler()) ||
+            this.reflector.get<PERMISSION_ACTIONS>(RBAcPermissions.name, context.getClass());
 
         return permission;
     }
