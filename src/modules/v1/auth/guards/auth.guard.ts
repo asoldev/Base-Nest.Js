@@ -1,9 +1,4 @@
-import {
-    CanActivate,
-    ExecutionContext,
-    Injectable,
-    UnauthorizedException,
-} from "@nestjs/common";
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
@@ -16,11 +11,7 @@ export class AuthGuard implements CanActivate {
     protected configService: ConfigService;
     protected reflector: Reflector;
 
-    constructor(
-        jwtService: JwtService,
-        configService: ConfigService,
-        reflector: Reflector
-    ) {
+    constructor(jwtService: JwtService, configService: ConfigService, reflector: Reflector) {
         this.jwtService = jwtService;
         this.configService = configService;
         this.reflector = reflector;
@@ -34,15 +25,15 @@ export class AuthGuard implements CanActivate {
         if (!token) {
             throw new UnauthorizedException("Invalid request token");
         }
-        try {
-            const payload = await this.jwtService.verifyAsync(token, {
+        const payload = await this.jwtService
+            .verifyAsync(token, {
                 secret: this.configService.get<string>("jwt.secret"),
+            })
+            .catch(() => {
+                throw new UnauthorizedException("Could not authorize request");
             });
 
-            request["user"] = payload;
-        } catch {
-            throw new UnauthorizedException("Could not authorize request");
-        }
+        request["user"] = payload;
         return true;
     }
 
@@ -52,9 +43,6 @@ export class AuthGuard implements CanActivate {
     }
 
     protected getReflectorPublic(context: ExecutionContext) {
-        return this.reflector.getAllAndOverride<boolean>(IsPublic.name, [
-            context.getHandler(),
-            context.getClass(),
-        ]);
+        return this.reflector.getAllAndOverride<boolean>(IsPublic.name, [context.getHandler(), context.getClass()]);
     }
 }

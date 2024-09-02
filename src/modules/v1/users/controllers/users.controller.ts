@@ -4,7 +4,6 @@ import { Types } from "mongoose";
 import { User } from "src/core/entities/user.schema";
 import { BaseDto } from "src/core/utils/base-dto.helper";
 import { PaginationDto } from "src/modules/abstracts/repository.abstract";
-import { IsPublic } from "src/shared/decorator/public.decorator";
 import { SearchParams } from "src/shared/decorator/search.decorator";
 import { ParseObjectIdPipe } from "src/shared/pipes/mongodb-id-validation.pipe";
 import { UserRequestDto } from "../../dtos/request.dto.ts/user.request.dto";
@@ -14,7 +13,6 @@ import { UsersService } from "../services/users.service";
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
-    @IsPublic()
     @Get()
     getAll(@SearchParams() params: AqpQuery): Promise<PaginationDto<User>> {
         return this.usersService.dataService.users.findAll(params);

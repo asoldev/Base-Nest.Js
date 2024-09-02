@@ -1,4 +1,9 @@
+import { Categories } from "src/core/entities/categories.schema";
+import { Channel } from "src/core/entities/channel.schema";
+import { EntitiesTypes } from "src/core/entities/entities_types.schema";
+import { Posts } from "src/core/entities/posts.schema";
 import { Role } from "src/core/entities/role.schema";
+import { Tags } from "src/core/entities/tag.schema";
 import { User } from "src/core/entities/user.schema";
 import { AbstractRepository } from "./repository.abstract";
 
@@ -11,23 +16,11 @@ import { AbstractRepository } from "./repository.abstract";
  * @class AbstractDataServices
  */
 export abstract class AbstractDataServices {
-    /**
-     * Abstract repository for managing user entities.
-     * Implementations must provide a concrete repository for User entities
-     * to perform CRUD operations.
-     *
-     * @type {AbstractRepository<User>}
-     * @abstract
-     */
     abstract users: AbstractRepository<User>;
-
-    /**
-     * Abstract repository for managing role entities.
-     * Implementations must provide a concrete repository for Role entities
-     * to perform CRUD operations.
-     *
-     * @type {AbstractRepository<Role>}
-     * @abstract
-     */
     abstract roles: AbstractRepository<Role>;
+    abstract entitiesTypes: AbstractRepository<EntitiesTypes>;
+    abstract categories: AbstractRepository<Categories>;
+    abstract posts: AbstractRepository<Posts>;
+    abstract tags: AbstractRepository<Tags>;
+    abstract channel: AbstractRepository<Channel>;
 }

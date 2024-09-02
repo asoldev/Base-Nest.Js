@@ -2,11 +2,10 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 import { IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { BaseEntity } from "./base.schema";
+import { Document } from "mongoose";
 import { COLLECTION_NAME } from "./enum/collection-name.enum";
-
 @Schema({ collection: COLLECTION_NAME.USER })
-export class User extends BaseEntity {
+export class User extends Document {
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
@@ -41,6 +40,10 @@ export class User extends BaseEntity {
     @Expose()
     @Prop({ type: String, required: false, default: null })
     phone: string;
+
+    @Expose()
+    @Prop({ type: Boolean, required: false, default: true })
+    is_active: boolean;
 
     @ApiProperty()
     @IsString()

@@ -51,11 +51,7 @@ export abstract class AbstractRepository<T> {
      * @param options - Additional query options.
      * @returns A promise that resolves with the found document or null if not found.
      */
-    abstract findOneById(
-        id: Types.ObjectId,
-        projection?: ProjectionType<T>,
-        options?: QueryOptions
-    ): Promise<T | null>;
+    abstract findOneById(id: Types.ObjectId, projection?: ProjectionType<T>, options?: QueryOptions): Promise<T | null>;
 
     /**
      * Finds a single document matching the filter.
@@ -64,20 +60,16 @@ export abstract class AbstractRepository<T> {
      * @param options - Additional query options.
      * @returns A promise that resolves with the found document or null if not found.
      */
-    abstract findOne(
-        filter: FilterQuery<T>,
-        projection?: ProjectionType<T>,
-        options?: QueryOptions
-    ): Promise<T | null>;
+    abstract findOne(filter: FilterQuery<T>, projection?: ProjectionType<T>, options?: QueryOptions): Promise<T | null>;
 
     /**
      * Inserts a single document into the collection.
      *
-     * @param item - The document to insert. Must match the type T.
+     * @param item - The document to insert. Must match the type Partial<T>.
      * @param options - Optional query options.
      * @returns A promise that resolves to the inserted document.
      */
-    abstract insertOne(item: T, options?: QueryOptions): Promise<T>;
+    abstract insertOne(item: Partial<T>, options?: QueryOptions): Promise<T>;
 
     /**
      * Inserts multiple documents into the collection.
@@ -141,10 +133,7 @@ export abstract class AbstractRepository<T> {
      * @param hard - A boolean indicating whether the deletion is hard (permanent) or soft (mark as deleted).
      * @returns A promise that resolves with the result of the delete operation, which may include the number of documents deleted.
      */
-    abstract deleteMany(
-        filter: FilterQuery<T>,
-        hard: boolean
-    ): Promise<UpdateWriteOpResult | DeleteResult>;
+    abstract deleteMany(filter: FilterQuery<T>, hard: boolean): Promise<UpdateWriteOpResult | DeleteResult>;
 
     /**
      * Restores a soft-deleted document by its ID (sets is_active to true).

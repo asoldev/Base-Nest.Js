@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@
 import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
-import { PERMISSION_ACTIONS } from "src/core/entities/permission.schema";
+import { PERMISSION_ACTIONS } from "src/core/entities/shared/permission.schema";
 import { RBAcPermissions } from "src/shared/decorator/rbac.permissions.decorator";
 import { RbacService } from "../services/rbac.service";
 import { AuthGuard } from "./auth.guard";
@@ -23,14 +23,10 @@ export class RBAcGuard extends AuthGuard implements CanActivate {
 
         const request = context.switchToHttp().getRequest();
         const permission = this.getReflectorPermission(context);
-        const entitiesType = request.headers["entities_type"];
+        const entitiesTypeId = request.headers["entities_type_id"];
         const user = request.user;
 
-        if (!user?.role) {
-            throw new ForbiddenException("User role is not defined. Access denied.");
-        }
-
-        if (!entitiesType) {
+        if (!entitiesTypeId) {
             throw new ForbiddenException("Missing field entities type.");
         }
 
@@ -38,7 +34,7 @@ export class RBAcGuard extends AuthGuard implements CanActivate {
             return true;
         }
 
-        const hasRequiredPermissions = await this.rbacService.checkUserPermissions(user, entitiesType, permission);
+        const hasRequiredPermissions = await this.rbacService.checkUserPermissions(user, entitiesTypeId, permission);
 
         if (!hasRequiredPermissions) {
             throw new ForbiddenException("Insufficient permissions. Access denied.");

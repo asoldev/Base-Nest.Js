@@ -4,12 +4,11 @@ import { Expose } from "class-transformer";
 import { IsMongoId, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { Types } from "mongoose";
 import { COLLECTION_NAME } from "./enum/collection-name.enum";
+import { PERMISSION_ACTIONS, Permissions } from "./shared/permission.schema";
 import { User } from "./user.schema";
-import { BaseEntity } from "./base.schema";
-import { Permissions, PERMISSION_ACTIONS } from "./permission.schema";
 
 @Schema({ collection: COLLECTION_NAME.ROLE })
-export class Role extends BaseEntity {
+export class Role extends Document {
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
@@ -40,4 +39,4 @@ export class Role extends BaseEntity {
 }
 
 export const RoleSchema = SchemaFactory.createForClass(Role);
-RoleSchema.index({ "permissions.key": 1, "permissions.value": 1 });
+RoleSchema.index({ "permissions.entities_types": 1, "permissions.action": 1 });
