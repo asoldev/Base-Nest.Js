@@ -14,6 +14,7 @@ export const environment = () => ({
         USE_SSL: process.env.MINIO_USE_SSL === "true",
         ACCESS_KEY: process.env.MINIO_ACCESSKEY,
         SECRET_KEY: process.env.MINIO_SECRETKEY,
+        PUBLIC: process.env.MINIO_PUBLIC,
     },
     mongodb: {
         url: process.env.MONGODB_URL,

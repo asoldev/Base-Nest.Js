@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { AbstractStorageService } from "src/modules/abstracts/storage-service.abstract";
+import { AbstractStorageService } from "src/modules/abstraction/storage-service.abstract";
 import { MinioService } from "./minio.services";
 
 @Module({

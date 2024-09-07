@@ -4,6 +4,7 @@ import {
     InsertManyOptions,
     InsertManyResult,
     ObjectId,
+    PopulateOptions,
     ProjectionType,
     QueryOptions,
     SortOrder,
@@ -23,7 +24,7 @@ export type PaginationDto<T> = {
 };
 
 // Define the repository service interface
-export abstract class AbstractRepository<T> {
+export abstract class AbstractRepositoryService<T> {
     /**
      * Finds all documents matching the filter with optional pagination, sorting, and projection.
      * @param filter - Query filter.
@@ -40,8 +41,8 @@ export abstract class AbstractRepository<T> {
         skip?: number,
         limit?: number,
         sort?: string | { [key: string]: SortOrder } | [string, SortOrder][],
-        options?: QueryOptions,
-        populate?: string[]
+        population?: PopulateOptions[],
+        options?: QueryOptions
     ): Promise<PaginationDto<T>>;
 
     /**
@@ -51,7 +52,12 @@ export abstract class AbstractRepository<T> {
      * @param options - Additional query options.
      * @returns A promise that resolves with the found document or null if not found.
      */
-    abstract findOneById(id: Types.ObjectId, projection?: ProjectionType<T>, options?: QueryOptions): Promise<T | null>;
+    abstract findOneById(
+        id: Types.ObjectId,
+        population?: PopulateOptions[],
+        projection?: ProjectionType<T>,
+        options?: QueryOptions
+    ): Promise<T | null>;
 
     /**
      * Finds a single document matching the filter.
@@ -60,7 +66,12 @@ export abstract class AbstractRepository<T> {
      * @param options - Additional query options.
      * @returns A promise that resolves with the found document or null if not found.
      */
-    abstract findOne(filter: FilterQuery<T>, projection?: ProjectionType<T>, options?: QueryOptions): Promise<T | null>;
+    abstract findOne(
+        filter: FilterQuery<T>,
+        population?: PopulateOptions[],
+        projection?: ProjectionType<T>,
+        options?: QueryOptions
+    ): Promise<T | null>;
 
     /**
      * Inserts a single document into the collection.

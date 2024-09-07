@@ -7,7 +7,7 @@ import {
     ParamsCreateBucket,
     ParamsGetObject,
     paramsPutObject,
-} from "src/modules/abstracts/storage-service.abstract";
+} from "src/modules/abstraction/storage-service.abstract";
 import internal from "stream";
 
 @Injectable()
@@ -19,13 +19,7 @@ export class MinioRepository implements AbstractStorageService {
 
     async putObject(params: paramsPutObject): Promise<UploadedObjectInfo> {
         const { bucketName, objectName, stream, size, metaData } = params;
-        return this._repository.putObject(
-            bucketName,
-            objectName,
-            stream,
-            size,
-            metaData
-        );
+        return this._repository.putObject(bucketName, objectName, stream, size, metaData);
     }
 
     async getObject(params: ParamsGetObject): Promise<internal.Readable> {

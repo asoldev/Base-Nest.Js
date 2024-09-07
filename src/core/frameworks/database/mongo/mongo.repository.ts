@@ -5,6 +5,7 @@ import {
     InsertManyOptions,
     Model,
     ObjectId,
+    PopulateOptions,
     ProjectionType,
     QueryOptions,
     Types,
@@ -12,9 +13,9 @@ import {
     UpdateWithAggregationPipeline,
     UpdateWriteOpResult,
 } from "mongoose";
-import { AbstractRepository, PaginationDto } from "src/modules/abstracts/repository.abstract";
+import { AbstractRepositoryService, PaginationDto } from "src/modules/abstraction/repository.abstract";
 
-export class MongoRepository<T> implements AbstractRepository<T> {
+export class MongoRepository<T> implements AbstractRepositoryService<T> {
     private _repository: Model<T>;
     constructor(repository: Model<T>) {
         this._repository = repository;
@@ -48,11 +49,12 @@ export class MongoRepository<T> implements AbstractRepository<T> {
 
     public async findOneById(
         id: Types.ObjectId,
+        population?: PopulateOptions[],
         projection?: ProjectionType<T>,
         options?: QueryOptions
     ): Promise<T | null> {
         try {
-            return this._repository.findById(id, projection, options).exec();
+            return this._repository.findById(id, projection, options).populate(population).exec() as T;
         } catch (error) {
             throw new MongoError(error);
         }
@@ -60,11 +62,12 @@ export class MongoRepository<T> implements AbstractRepository<T> {
 
     public async findOne(
         filter: FilterQuery<T>,
+        population?: PopulateOptions[],
         projection?: ProjectionType<T>,
         options?: QueryOptions
     ): Promise<T | null> {
         try {
-            return this._repository.findOne(filter, projection, options).exec();
+            return this._repository.findOne(filter, projection, options).populate(population).exec() as T;
         } catch (error) {
             throw new MongoError(error);
         }

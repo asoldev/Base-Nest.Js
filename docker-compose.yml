@@ -2,21 +2,21 @@ version: "3.8"
 
 services:
     # backend:
-    # container_name: backend-api
-    # restart: always
-    # build:
-    #     context: .
-    #     dockerfile: Dockerfile
-    # ports:
-    #     - "5555:5555"
-    # env_file:
-    #     - .env.build
-    # depends_on:
-    #     - mongo
-    #     - redis
-    #     - minio
-    # networks:
-    #     - app-network
+    #     container_name: backend-api
+    #     restart: always
+    #     build:
+    #         context: .
+    #         dockerfile: Dockerfile
+    #     ports:
+    #         - "5555:5555"
+    #     env_file:
+    #         - .env.build
+    #     depends_on:
+    #         - mongo
+    #         - redis
+    #         - minio
+    #     networks:
+    #         - app-network
 
     mongo:
         image: mongo:latest
@@ -58,6 +58,20 @@ services:
         command: server /mnt/data --console-address ":9001"
         networks:
             - app-network
+
+    # nginx-proxy-manager:
+    #     container_name: nginx-proxy-manager
+    #     image: "jc21/nginx-proxy-manager:latest"
+    #     restart: unless-stopped
+    #     ports:
+    #         - "80:80" # Public HTTP Port
+    #         - "443:443" # Public HTTPS Port
+    #         - "81:81" # Admin Web Port
+    #     volumes:
+    #         - ./data:/data
+    #         - ./letsencrypt:/etc/letsencrypt
+    #     networks:
+    #         - app-network
 
 networks:
     app-network:

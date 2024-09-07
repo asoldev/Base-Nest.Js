@@ -4,7 +4,7 @@ import { Expose } from "class-transformer";
 import { IsNotEmpty, IsString } from "class-validator";
 import { COLLECTION_NAME } from "./enum/collection-name.enum";
 import { Language } from "./shared/language.schema";
-
+import { Document } from "mongoose";
 @Schema({ collection: COLLECTION_NAME.CHANNEL })
 export class Channel extends Document {
     @ApiProperty()

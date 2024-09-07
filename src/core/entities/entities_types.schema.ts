@@ -2,13 +2,13 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose } from "class-transformer";
 import { IsNotEmpty, IsString } from "class-validator";
+import { UUID } from "mongodb";
 import { Schema as MongooseSchema } from "mongoose";
 import { COLLECTION_NAME } from "./enum/collection-name.enum";
-import { BasicFields } from "./shared/basic_fields.schema";
-import { Language } from "./shared/language.schema";
 import { SchemaFields } from "./shared/schema_fields.schema";
 
-class LanguageEntitiesTypes extends Language {
+@Schema({ collection: COLLECTION_NAME.ENTITIES_TYPE })
+export class EntitiesTypes extends SchemaFields {
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
@@ -22,10 +22,7 @@ class LanguageEntitiesTypes extends Language {
     @Expose()
     @Prop({ required: true })
     slug: string;
-}
 
-@Schema({ collection: COLLECTION_NAME.ENTITIES_TYPE })
-export class EntitiesTypes extends SchemaFields {
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
@@ -33,8 +30,19 @@ export class EntitiesTypes extends SchemaFields {
     @Prop({ required: true })
     type: string;
 
-    @Prop({ type: Array<LanguageEntitiesTypes>, required: true })
-    languages: LanguageEntitiesTypes[];
+    @ApiProperty()
+    @IsString()
+    @IsNotEmpty()
+    @Expose()
+    @Prop({ required: true })
+    language: string;
+
+    @ApiProperty()
+    @IsString()
+    @IsNotEmpty()
+    @Expose()
+    @Prop({ required: false, default: new UUID() })
+    language_id: string;
 
     @Expose()
     @Prop({ type: MongooseSchema.Types.Mixed, default: null })

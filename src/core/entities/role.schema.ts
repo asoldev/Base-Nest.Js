@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose } from "class-transformer";
 import { IsMongoId, IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
 import { COLLECTION_NAME } from "./enum/collection-name.enum";
 import { PERMISSION_ACTIONS, Permissions } from "./shared/permission.schema";
 import { User } from "./user.schema";

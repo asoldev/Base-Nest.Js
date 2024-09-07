@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException, UnauthorizedExcepti
 import * as bcrypt from "bcrypt";
 import { User } from "src/core/entities/user.schema";
 import { BaseDto } from "src/core/utils/base-dto.helper";
-import { AbstractDataServices } from "src/modules/abstracts/data-services.abstract";
+import { AbstractDataServices } from "src/modules/abstraction/data-services.abstract";
 import { AuthenticationRequestDto } from "../../dtos/request.dto.ts/authentication.request.dto";
 import { TokenService } from "./token.service";
 

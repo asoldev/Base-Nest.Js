@@ -6,4 +6,5 @@ export enum COLLECTION_NAME {
     CATEGORIES = "categories",
     POSTS = "posts",
     TAGS = "tags",
+    MEDIA = "medias",
 }

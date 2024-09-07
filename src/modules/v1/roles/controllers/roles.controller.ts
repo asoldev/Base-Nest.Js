@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 import { BaseDto } from "src/core/utils/base-dto.helper";
 
 import { Role } from "src/core/entities/role.schema";
-import { PaginationDto } from "src/modules/abstracts/repository.abstract";
+import { PaginationDto } from "src/modules/abstraction/repository.abstract";
 import { ParseObjectIdPipe } from "src/shared/pipes/mongodb-id-validation.pipe";
 import { RoleRequestDto } from "../../dtos/request.dto.ts/role.request.dto";
 import { RolesService } from "../services/role.service";

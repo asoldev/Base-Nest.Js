@@ -5,7 +5,7 @@ import { Role } from "src/core/entities/role.schema";
 import { PERMISSION_ACTIONS, Permissions } from "src/core/entities/shared/permission.schema";
 import { User } from "src/core/entities/user.schema";
 import { CacheManagerService } from "src/core/frameworks/cache-manager/cache-manager.service";
-import { AbstractDataServices } from "src/modules/abstracts/data-services.abstract";
+import { AbstractDataServices } from "src/modules/abstraction/data-services.abstract";
 
 @Injectable()
 export class RbacService {

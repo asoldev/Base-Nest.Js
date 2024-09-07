@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { AbstractDataServices } from "src/modules/abstracts/data-services.abstract";
-import { AbstractStorageService } from "src/modules/abstracts/storage-service.abstract";
+import { AbstractDataServices } from "src/modules/abstraction/data-services.abstract";
+import { AbstractStorageService } from "src/modules/abstraction/storage-service.abstract";
 
 @Injectable()
 export class RolesService {
