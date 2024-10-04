@@ -1,50 +1,68 @@
-import { INestApplication } from "@nestjs/common";
-import { NestFactory } from "@nestjs/core";
-import { SwaggerModule } from "@nestjs/swagger";
+import "reflect-metadata";
+
+import { INestApplication } from "@nestjs/common/interfaces/nest-application.interface";
+import { ValidationPipe } from "@nestjs/common/pipes/validation.pipe";
+import { NestFactory } from "@nestjs/core/nest-factory";
 import helmet from "helmet";
 import * as morgan from "morgan";
 import { AppModule } from "src/app/app.module";
-import { configSwagger } from "src/config/swagger/swagger.config";
 import { HttpErrorExceptionFilter } from "src/shared/exception-filters/http-exception.filter";
 import { MongoErrorExceptionFilter } from "src/shared/exception-filters/mongodb-exception.filter";
+import { accessLogStream, errorLogStream } from "./config/morgan/morgan.config";
+import { LoggingInterceptor } from "./shared/interceptors/logging.interceptor";
+import { TimeoutInterceptor } from "./shared/interceptors/timeout.interceptor";
+import { TransformInterceptor } from "./shared/interceptors/transform.interceptor";
 
 async function bootstrap() {
-    const app: INestApplication = await NestFactory.create<INestApplication>(AppModule);
-    app.enableCors();
+  const app: INestApplication =
+    await NestFactory.create<INestApplication>(AppModule);
+  app.enableCors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+    credentials: true,
+  });
 
-    const isProduction = process.env.NODE_ENV === "production" ? true : false;
-    const PORT: number = parseInt(process.env.PORT);
+  const isProduction = process.env.NODE_ENV === "production" ? true : false;
+  const PORT: number = parseInt(process.env.PORT);
 
-    app.use(morgan("dev"));
+  app.setGlobalPrefix("api");
+  app.useGlobalInterceptors(new LoggingInterceptor());
+  app.useGlobalInterceptors(new TimeoutInterceptor());
+  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalFilters(
+    new MongoErrorExceptionFilter(),
+    new HttpErrorExceptionFilter()
+  );
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+    })
+  );
 
-    app.setGlobalPrefix("api/v1");
-
-    app.useGlobalFilters(new MongoErrorExceptionFilter(), new HttpErrorExceptionFilter());
-
+  if (isProduction) {
     app.use(
-        helmet({
-            contentSecurityPolicy: isProduction ? undefined : false,
-            crossOriginEmbedderPolicy: isProduction ? undefined : false,
-        })
+      helmet({
+        contentSecurityPolicy: true,
+        crossOriginEmbedderPolicy: true,
+      })
     );
-    app.enableCors({
-        origin: "*",
-        methods: ["GET", "POST", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
-        credentials: true,
-    });
 
-    SwaggerModule.setup("api-docs", app, configSwagger(app), {
-        swaggerOptions: {
-            persistAuthorization: true,
-            defaultModelsExpandDepth: -1,
-        },
-    });
+    app.use(morgan("combined", { stream: accessLogStream }));
+    app.use(
+      morgan("combined", {
+        skip: (req, res) => res.statusCode < 400,
+        stream: errorLogStream,
+      })
+    );
+  }
 
-    await app.listen(PORT);
+  if (isNaN(PORT)) {
+    console.error("No port provided. 👏");
+    process.exit(666);
+  }
 
-    if (isNaN(parseInt(process.env.PORT))) {
-        console.error("No port provided. 👏");
-        process.exit(666);
-    }
+  await app.listen(PORT);
+  console.log(`NestJs development server started: ${await app.getUrl()} 👍`);
 }
-bootstrap().then(() => console.log("Service listening 👍: ", process.env.PORT));
+bootstrap();

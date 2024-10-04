@@ -5,15 +5,18 @@ import { MongoError } from "mongodb";
 export class MongoErrorExceptionFilter implements ExceptionFilter {
     catch(exception: MongoError, host: ArgumentsHost) {
         const response = host.switchToHttp().getResponse();
+        const ctx = host.switchToHttp();
+        const request = ctx.getRequest<Request>();
 
         const status = HttpStatus.UNPROCESSABLE_ENTITY;
 
         const codeError = exception.code;
         const result = {
-            code: codeError,
-            timestamp: new Date().toISOString(),
-            message: exception.message,
             error: true,
+            code: codeError,
+            message: exception.message,
+            timestamp: new Date().toISOString(),
+            path: request.url,
         };
         switch (codeError) {
             default:

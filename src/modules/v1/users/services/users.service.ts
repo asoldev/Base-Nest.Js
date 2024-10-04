@@ -7,21 +7,24 @@ import { AbstractDataServices } from "src/modules/abstraction/data-services.abst
 
 @Injectable()
 export class UsersService {
-    constructor(
-        public dataService: AbstractDataServices,
-        public cacheManagerService: CacheManagerService
-    ) {}
+  constructor(
+    public dataService: AbstractDataServices,
+    public cacheManagerService: CacheManagerService
+  ) {}
 
-    public async delete(_id: Types.ObjectId, hard: boolean): Promise<User> {
-        const isDeleted = await this.dataService.users.deleteOne(_id, hard);
-        const cacheKey = this.cacheManagerService.generateKey(COLLECTION_NAME.USER, isDeleted._id.toString());
+  public async delete(_id: Types.ObjectId, hard: boolean): Promise<User> {
+    const isDeleted = await this.dataService.users.deleteOne(_id, hard);
+    const cacheKey = this.cacheManagerService.generateKey(
+      COLLECTION_NAME.USER,
+      isDeleted._id.toString()
+    );
 
-        if (hard) {
-            await this.cacheManagerService.del(cacheKey);
-        } else {
-            await this.cacheManagerService.set(cacheKey, isDeleted);
-        }
-
-        return isDeleted;
+    if (hard) {
+      await this.cacheManagerService.del(cacheKey);
+    } else {
+      await this.cacheManagerService.set(cacheKey, isDeleted);
     }
+
+    return isDeleted;
+  }
 }

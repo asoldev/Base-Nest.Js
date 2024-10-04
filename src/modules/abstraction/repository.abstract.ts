@@ -66,7 +66,7 @@ export abstract class AbstractRepositoryService<T> {
      * @param options - Additional query options.
      * @returns A promise that resolves with the found document or null if not found.
      */
-    abstract findOne(
+    abstract findOneByFilter(
         filter: FilterQuery<T>,
         population?: PopulateOptions[],
         projection?: ProjectionType<T>,

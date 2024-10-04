@@ -1,28 +1,21 @@
-import { Prop, Schema } from "@nestjs/mongoose";
-import { ApiProperty } from "@nestjs/swagger";
-import { Expose } from "class-transformer";
-import { IsNotEmpty } from "class-validator";
-import { Types } from "mongoose";
+import { Prop } from "@nestjs/mongoose/dist/decorators/prop.decorator";
+import { Schema } from "@nestjs/mongoose/dist/decorators/schema.decorator";
+import { Expose } from "class-transformer/types/decorators/expose.decorator";
 import { COLLECTION_NAME } from "../enum/collection-name.enum";
+import { Types } from "mongoose";
+import { IsNotEmpty } from "class-validator";
 
 export enum PERMISSION_ACTIONS {
-    GET = "GET",
-    CREATE = "CREATE",
-    UPDATE = "UPDATE",
-    DELETE = "DELETE",
+  GET = "GET",
+  CREATE = "CREATE",
+  UPDATE = "UPDATE",
+  DELETE = "DELETE",
 }
 
 @Schema()
 export class Permissions {
-    @ApiProperty()
-    @Expose()
-    @IsNotEmpty()
-    @Prop({ type: Types.ObjectId, required: true, ref: COLLECTION_NAME.ENTITIES_TYPE })
-    entities_types: Types.ObjectId;
-
-    @ApiProperty()
-    @Expose()
-    @IsNotEmpty()
-    @Prop({ type: Array<PERMISSION_ACTIONS>, required: true })
-    action: PERMISSION_ACTIONS[];
+  @Expose()
+  @IsNotEmpty()
+  @Prop({ type: Array<PERMISSION_ACTIONS>, required: true })
+  action: PERMISSION_ACTIONS[];
 }
